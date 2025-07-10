@@ -85,6 +85,10 @@ export default function App() {
   }
 
   function handleNav(p: typeof page) {
+    if (p === 'admin' && !isAdmin()) {
+      setSubmitMsg('Du bist kein Admin und hast keinen Zugriff auf das Admin-Panel.');
+      return;
+    }
     setPage(p);
     setSubmitMsg('');
   }
@@ -164,7 +168,9 @@ export default function App() {
         </div>
         <div className="nav-actions">
           {isAdmin() && (
-            <button id="show-admin-panel-btn" onClick={()=>handleNav('admin')}>Admin Panel</button>
+            <button id="show-admin-panel-btn" style={{display: 'inline-block'}} onClick={()=>handleNav('admin')}>
+              Admin Panel
+            </button>
           )}
           {user && (
             <div className="user-info" id="user-info">
@@ -232,43 +238,50 @@ export default function App() {
             {submitMsg && <div style={{marginTop:12, color:'#43B581', fontWeight:500}}>{submitMsg}</div>}
           </form>
         )}
-        {user && page==='admin' && isAdmin() && (
-          <div id="admin-page">
-            <h3>All Applications</h3>
-            <div id="admin-app-cards">
-              {applications.length === 0 && <div className="info-card">No applications yet.</div>}
-              {applications.map((app, idx) => (
-                <div className="admin-app-card" key={idx}>
-                  <h4>{app.username}</h4>
-                  <div><b>Age:</b> {app.age}</div>
-                  <div><b>Experience:</b> {app.experience}</div>
-                  <div><b>Motivation:</b> {app.motivation}</div>
-                  <div><b>Status:</b> <span>{app.status}</span></div>
-                  <div className="admin-app-actions">
-                    <button onClick={()=>handleAdminStatus(idx, 'In Progress')}>In Progress</button>
-                    <button onClick={()=>handleAdminStatus(idx, 'Rejected')}>Rejected</button>
-                    <button onClick={()=>handleAdminStatus(idx, 'Accepted')}>Accepted</button>
-                    <button className="delete-btn" onClick={()=>handleAdminDelete(idx)}>Delete</button>
+        {user && page==='admin' && (
+          isAdmin() ? (
+            <div id="admin-page">
+              <h3>All Applications</h3>
+              <div id="admin-app-cards">
+                {applications.length === 0 && <div className="info-card">No applications yet.</div>}
+                {applications.map((app, idx) => (
+                  <div className="admin-app-card" key={idx}>
+                    <h4>{app.username}</h4>
+                    <div><b>Age:</b> {app.age}</div>
+                    <div><b>Experience:</b> {app.experience}</div>
+                    <div><b>Motivation:</b> {app.motivation}</div>
+                    <div><b>Status:</b> <span>{app.status}</span></div>
+                    <div className="admin-app-actions">
+                      <button onClick={()=>handleAdminStatus(idx, 'In Progress')}>In Progress</button>
+                      <button onClick={()=>handleAdminStatus(idx, 'Rejected')}>Rejected</button>
+                      <button onClick={()=>handleAdminStatus(idx, 'Accepted')}>Accepted</button>
+                      <button className="delete-btn" onClick={()=>handleAdminDelete(idx)}>Delete</button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            {showAdminUsers && (
-              <div id="admin-users-section" style={{marginTop:18}}>
-                <h4>Manage Admins</h4>
-                <form id="add-admin-form" style={{display:'flex',gap:8}} onSubmit={handleAddAdmin}>
-                  <input type="text" id="new-admin" placeholder="Discord Username#0000" value={newAdmin} onChange={e=>setNewAdmin(e.target.value)} required />
-                  <button type="submit">Add</button>
-                </form>
-                <ul id="admin-list" style={{marginTop:10}}>
-                  {admins.map((a,i)=>(<li key={i}>{a}</li>))}
-                </ul>
+                ))}
               </div>
-            )}
-          </div>
+              {showAdminUsers && (
+                <div id="admin-users-section" style={{marginTop:18}}>
+                  <h4>Manage Admins</h4>
+                  <form id="add-admin-form" style={{display:'flex',gap:8}} onSubmit={handleAddAdmin}>
+                    <input type="text" id="new-admin" placeholder="Discord Username#0000" value={newAdmin} onChange={e=>setNewAdmin(e.target.value)} required />
+                    <button type="submit">Add</button>
+                  </form>
+                  <ul id="admin-list" style={{marginTop:10}}>
+                    {admins.map((a,i)=>(<li key={i}>{a}</li>))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="info-card" style={{marginTop:32, textAlign:'center', color:'#ff7675'}}>
+              Du bist kein Admin und hast keinen Zugriff auf das Admin-Panel.
+            </div>
+          )
         )}
       </div>
       <div className="footer">&copy; 2025</div>
     </>
   );
 }
+
