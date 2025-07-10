@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
+import { AdminPanel } from './components/AdminPanel';
 
 const CLIENT_ID = '1309914559481516042';
 const REDIRECT_URI = window.location.origin + '/';
@@ -240,39 +241,29 @@ export default function App() {
         )}
         {user && page==='admin' && (
           isAdmin() ? (
-            <div id="admin-page">
-              <h3>All Applications</h3>
-              <div id="admin-app-cards">
-                {applications.length === 0 && <div className="info-card">No applications yet.</div>}
-                {applications.map((app, idx) => (
-                  <div className="admin-app-card" key={idx}>
-                    <h4>{app.username}</h4>
-                    <div><b>Age:</b> {app.age}</div>
-                    <div><b>Experience:</b> {app.experience}</div>
-                    <div><b>Motivation:</b> {app.motivation}</div>
-                    <div><b>Status:</b> <span>{app.status}</span></div>
-                    <div className="admin-app-actions">
-                      <button onClick={()=>handleAdminStatus(idx, 'In Progress')}>In Progress</button>
-                      <button onClick={()=>handleAdminStatus(idx, 'Rejected')}>Rejected</button>
-                      <button onClick={()=>handleAdminStatus(idx, 'Accepted')}>Accepted</button>
-                      <button className="delete-btn" onClick={()=>handleAdminDelete(idx)}>Delete</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {showAdminUsers && (
-                <div id="admin-users-section" style={{marginTop:18}}>
-                  <h4>Manage Admins</h4>
-                  <form id="add-admin-form" style={{display:'flex',gap:8}} onSubmit={handleAddAdmin}>
-                    <input type="text" id="new-admin" placeholder="Discord Username#0000" value={newAdmin} onChange={e=>setNewAdmin(e.target.value)} required />
-                    <button type="submit">Add</button>
-                  </form>
-                  <ul id="admin-list" style={{marginTop:10}}>
-                    {admins.map((a,i)=>(<li key={i}>{a}</li>))}
-                  </ul>
-                </div>
-              )}
-            </div>
+            <AdminPanel 
+              applications={applications.map((app, idx) => ({
+                id: String(idx),
+                userId: app.userId || '',
+                discordUsername: app.username || app.discordUsername || '',
+                age: Number(app.age),
+                timezone: app.timezone || '-',
+                experience: app.experience || '',
+                motivation: app.motivation || '',
+                scenario: app.scenario || '',
+                status: (app.status === 'Accepted' ? 'approved' : app.status === 'Rejected' ? 'rejected' : 'pending'),
+                createdAt: app.createdAt || new Date().toISOString(),
+                userEmail: app.userEmail || ''
+              }))}
+              onApplicationSelect={() => {}}
+              onStatusUpdate={(id, status) => {
+                // Finde Index und update Status
+                const idx = Number(id);
+                let apps = [...applications];
+                apps[idx].status = status === 'approved' ? 'Accepted' : status === 'rejected' ? 'Rejected' : 'Submitted';
+                setApplications(apps);
+              }}
+            />
           ) : (
             <div className="info-card" style={{marginTop:32, textAlign:'center', color:'#ff7675'}}>
               Du bist kein Admin und hast keinen Zugriff auf das Admin-Panel.
@@ -284,4 +275,3 @@ export default function App() {
     </>
   );
 }
-
